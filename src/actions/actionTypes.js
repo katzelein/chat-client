@@ -1,2 +1,3 @@
-export const FETCH_STUFF = 'FETCH_STUFF';
-export const RECEIVE_STUFF = 'RECEIVE_STUFF';
+export const FETCH_USER = 'FETCH_USER';
+export const SEND_MESSAGE = 'SEND_MESSAGE';
+export const TOGGLE_USER_TYPING = 'TOGGLE_USER_TYPING';

@@ -1,60 +1,61 @@
-import {connect} from 'react-redux';
-import {bindActionCreators} from 'redux';
-import * as stuffActions from '../actions/stuffActions';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import { fetchUser, toggleUserTyping } from '../actions/actionCreators';
 import PropTypes from 'prop-types';
 import React from 'react';
+import { bindAll } from 'lodash';
+import NewMessage from './NewMessage';
+import MessageList from './MessageList';
 
 
 class ChatClient extends React.Component {
 
+  constructor() {
+    super();
+    this.state = {
+      newMessageText: ''
+    }
+    bindAll(this, [
+      'onSubmit',
+      'onChange'
+    ])
+  }
+
+  componentDidMount() {
+    const { userId, fetchUser } = this.props;
+    if (userId === 1) fetchUser(1);
+  }
+
+  onSubmit(e) {
+    console.log("submitted", e)
+    e.preventDefault();
+  }
+
+  onChange(e) {
+    const { toggleUserTyping, messages, userId } = this.props;
+    if (!messages.usersTyping.includes(userId)) {
+      toggleUserTyping(userId);
+    }
+    this.setState({
+      newMessageText: e.target.value
+    })
+  }
+
   render() {
+    const { userId } = this.props;
     return (
       <div className="chat-client">
         <div className="user-interface">
           <div className="user-header" >
             Laura Linney
           </div>
-          <div className="message-list">
-            <div className="time-sent">
-              10:45 AM, Sep 27, 2012
-            </div>
-            <div className="sent-message">
-              <div className="user-image">
-                LL
-              </div>
-              <div className="chat-bubble-left">
-                <div className="left-text-triangle"/>
-                <div className="sent-text">
-                  Hi Rob. What are you doing? I had a great today thanks in advance for askingggggg.
-                </div>
-              </div>
-            </div>
-            <div className="received-message">
-              <div className="user-image">
-                JR
-              </div>
-              <div className="chat-bubble-right">
-                <div className="right-text-triangle"/>
-                <div className="received-text">
-                  Hi Laura. I'm filling out a job application.
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="new-message">
-            <form className="new-message-form">
-              <input
-                type="text"
-                className="new-message-input"
-                placeholder="Say anything..."
-              />
-              <button
-                type="submit"
-                value="Submit"
-                className="ok-button"
-              >OK</button>
-            </form>
-          </div>
+          <MessageList
+            isUser={userId === 1}
+          />
+          <NewMessage
+            onChange={this.onChange}
+            onSubmit={this.onSubmit}
+          />
         </div>
       </div>
     );
@@ -62,21 +63,23 @@ class ChatClient extends React.Component {
 }
 
 ChatClient.propTypes = {
-  stuffActions: PropTypes.object,
-  stuffs: PropTypes.array
+  actionCreators: PropTypes.object,
+  accounts: PropTypes.object
 };
 
-function mapStateToProps(state) {
-  return {
-    stuffs: state.stuffs
-  };
-}
+const mapStateToProps = state => ({
+  accounts: state.accounts,
+  messages: state.messages
+});
 
-function mapDispatchToProps(dispatch) {
-  return {
-    stuffActions: bindActionCreators(stuffActions, dispatch)
-  };
-}
+const mapDispatchToProps = dispatch =>
+  bindActionCreators(
+    {
+      fetchUser,
+      toggleUserTyping
+    },
+    dispatch
+  );
 
 export default connect(
   mapStateToProps,

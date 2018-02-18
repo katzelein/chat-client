@@ -1,8 +1,10 @@
-import {combineReducers} from 'redux';
-import stuff from './stuffReducer';
+import { combineReducers } from 'redux';
+import accounts from './accountsReducer';
+import messages from './messagesReducer';
 
 const rootReducer = combineReducers({
-  stuff
+  accounts,
+  messages
 });
 
 export default rootReducer;

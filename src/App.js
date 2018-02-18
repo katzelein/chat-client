@@ -6,7 +6,8 @@ class App extends Component {
   render() {
     return (
       <div className="app">
-        <ChatClient />
+        <ChatClient userId={1}/>
+        <ChatClient userId={2}/>
       </div>
     );
   }

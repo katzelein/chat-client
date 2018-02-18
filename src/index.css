@@ -7,6 +7,8 @@ body {
 .chat-client {
   width: 400px;
   height: 600px;
+  display: inline-block;
+  margin: 20px;
 }
 
 .user-interface: {
@@ -24,14 +26,15 @@ body {
   text-align: center;
 }
 
-.sent-message, .received-message {
+.message-block {
   display: flex;
   align-items: flex-start;
   margin-top: 10px;
+  flex-direction: row-reverse;
 }
 
-.received-message {
-  flex-direction: row-reverse;
+.message-block.is-user {
+  flex-direction: row;
 }
 
 .message-list {
@@ -40,22 +43,20 @@ body {
   background-color: #384d62;
 }
 
-.sent-text, .received-text {
+.message-text {
   display: inline-block;
   padding: 10px;
   border-radius: 10px;
   max-width: 300px;
+  background-color: #fff;
+  margin-left: 10px;
 }
 
-.sent-text {
+.message-text.is-user {
   background-color: #24b2b5;
   color: #fff;
   margin-right: 10px;
-}
-
-.received-text {
-  background-color: #fff;
-  margin-left: 10px;
+  margin-left: 0;
 }
 
 .user-image {
@@ -69,24 +70,19 @@ body {
   margin: 0px 10px 5px 10px;
 }
 
-.left-text-triangle {
+.text-triangle {
   width: 0;
   height: 0;
   border-top: 5px solid transparent;
   border-bottom: 5px solid transparent;
-  border-right: 5px solid #24b2b5;
   display: inline-block;
   margin-top: 13px;
+  border-left: 5px solid #fff;
 }
 
-.right-text-triangle {
-  width: 0;
-  height: 0;
-  border-top: 5px solid transparent;
-  border-bottom: 5px solid transparent;
-  border-left: 5px solid #fff;
-  display: inline-block;
-  margin-top: 13px;
+.text-triangle.is-user {
+  border-right: 5px solid #24b2b5;
+  border-left: 0;
 }
 
 .new-message {
@@ -119,12 +115,13 @@ body {
   font-size: 12px;
 }
 
-.chat-bubble-left, .chat-bubble-right {
-  display: flex;
+.chat-bubble {
+  display: inline-flex;
+  flex-direction: row-reverse;
 }
 
-.chat-bubble-right {
-  flex-direction: row-reverse
+.chat-bubble.is-user {
+  flex-direction: row;
 }
 
 .ok-button {
