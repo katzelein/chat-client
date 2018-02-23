@@ -1,20 +1,25 @@
 import initialState from './initialState';
-import { FETCH_USER } from '../actions/actionTypes';
+import { FETCH_SENDER, FETCH_RECEIVER } from '../actions/actionTypes';
 import _ from 'lodash';
 
 const accounts = (state = initialState.accounts, action) => {
-  let newState;
-
   switch (action.type) {
 
-    case FETCH_USER:
-      const selectedUser =
+    case FETCH_SENDER:
+      const selectedSender =
         _.find(state.users, (user) => { return user.id === action.userId });
-      newState = {
+      return {
         ...state,
-        selectedUser
+        selectedSender
       };
-      return newState;
+
+    case FETCH_RECEIVER:
+      const selectedReceiver =
+        _.find(state.users, (user) => { return user.id === action.userId });
+      return {
+        ...state,
+        selectedReceiver
+      };
 
     default:
       return state;

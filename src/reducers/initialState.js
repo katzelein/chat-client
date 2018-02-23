@@ -5,16 +5,17 @@ export default {
         id: 1,
         firstName: 'Laura',
         lastName: 'Linney',
-        imgUrl: null
+        initials: 'LL'
       },
       {
         id: 2,
         firstName: 'Rob',
-        lastName: 'De Niro',
-        imgUrl: null
+        lastName: 'Pattinson',
+        initials: 'RP'
       }
     ],
-    selectedUser: null
+    selectedSender: null,
+    selectedReceiver: null
   },
   messages: {
     messageList: [],

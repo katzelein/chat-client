@@ -1,60 +1,157 @@
+import React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import { fetchUser, toggleUserTyping } from '../actions/actionCreators';
 import PropTypes from 'prop-types';
-import React from 'react';
 import { bindAll } from 'lodash';
-import NewMessage from './NewMessage';
+import moment from 'moment';
+import {
+  fetchSender,
+  fetchReceiver,
+  sendNewMessage,
+  userIsTyping,
+  userStoppedTyping,
+} from '../actions/actionCreators';
+import UserHeader from './UserHeader';
 import MessageList from './MessageList';
-
+import NewMessage from './NewMessage';
+import USER_MODE from '../constants';
 
 class ChatClient extends React.Component {
-
   constructor() {
     super();
     this.state = {
-      newMessageText: ''
-    }
+      newMessageText: '',
+      userId: null,
+    };
     bindAll(this, [
       'onSubmit',
-      'onChange'
-    ])
+      'onChange',
+      'checkForTyping',
+      'receiverId',
+      'userName',
+      'headerText',
+      'scrollNewMessage'
+    ]);
   }
 
   componentDidMount() {
-    const { userId, fetchUser } = this.props;
-    if (userId === 1) fetchUser(1);
+    const { fetchSender, fetchReceiver, mode } = this.props;
+
+    if (mode.type === USER_MODE.sender.type) {
+      fetchSender(mode.id);
+    } else {
+      fetchReceiver(mode.id);
+    };
+    this.setState({ userId: mode.id });
+    // Setting userId in state is only appropriate in this
+    // dual-screen setting sharing one Redux store
+  }
+
+  componentDidUpdate(prevProps) {
+    const { messageList, usersTyping } = this.props;
+    const shouldScroll =
+      messageList.length !== prevProps.messageList.length ||
+      usersTyping.length !== prevProps.usersTyping.length;
+    if (shouldScroll) {
+      this.scrollNewMessage();
+    };
   }
 
   onSubmit(e) {
-    console.log("submitted", e)
+    const { sendNewMessage, userStoppedTyping } = this.props;
+
     e.preventDefault();
+    sendNewMessage({
+      senderId: this.state.userId,
+      receiverId: this.receiverId(),
+      messageText: this.state.newMessageText,
+      timeSent: moment(),
+    });
+    this.setState({ newMessageText: '' });
   }
 
   onChange(e) {
-    const { toggleUserTyping, messages, userId } = this.props;
-    if (!messages.usersTyping.includes(userId)) {
-      toggleUserTyping(userId);
-    }
-    this.setState({
-      newMessageText: e.target.value
-    })
+    const { userIsTyping, usersTyping } = this.props;
+
+    if (!usersTyping.includes(this.state.userId)) {
+      userIsTyping(this.state.userId);
+    };
+    this.setState({ newMessageText: e.target.value });
+    this.checkForTyping(e.target.value);
+  }
+
+  checkForTyping(text) {
+    const { userStoppedTyping, usersTyping } = this.props;
+
+    setTimeout(() => {
+      const typingStopped = this.state.newMessageText === text;
+      if (typingStopped) {
+        userStoppedTyping(this.state.userId);
+      };
+    }, 500);
+  }
+
+  receiverId() {
+    const { selectedSender, selectedReceiver } = this.props;
+    const id = selectedSender.id !== this.state.userId
+      ? selectedSender.id
+      : selectedReceiver.id;
+    return id;
+  }
+
+  userName() {
+    const { selectedSender, selectedReceiver } = this.props;
+
+    const userAccount =
+      selectedSender && selectedReceiver &&
+      this.state.userId === selectedSender.id
+        ? selectedSender
+        : selectedReceiver;
+    return (userAccount && userAccount.firstName + ' ' + userAccount.lastName) || '';
+  }
+
+  headerText() {
+    const { mode, selectedSender, selectedReceiver, messageList } = this.props;
+
+    const recipient =
+      mode.type === 'sender' && selectedReceiver
+        ? selectedReceiver
+        : mode.type === 'receiver' && selectedReceiver
+        ? selectedSender
+        : null;
+    const fullName = recipient
+      ? recipient.firstName
+      : '';
+    const header =
+      messageList && !messageList.length || messageList && messageList[0].isTyping
+        ? 'Get the conversation started!'
+        : `Chat with ${fullName}`;
+    return header;
+  }
+
+  scrollNewMessage() {
+    const { mode } = this.props;
+    const list = document.getElementById(`list-mode-${mode.type}`);
+    const listHeight = list.scrollHeight;
+    list.scrollTop = listHeight;
   }
 
   render() {
-    const { userId } = this.props;
     return (
       <div className="chat-client">
         <div className="user-interface">
-          <div className="user-header" >
-            Laura Linney
-          </div>
+          <UserHeader
+            userName={this.userName()}
+            headerText={this.headerText()}
+          />
           <MessageList
-            isUser={userId === 1}
+            userId={this.state.userId}
+            mode={this.props.mode}
           />
           <NewMessage
             onChange={this.onChange}
             onSubmit={this.onSubmit}
+            newMessageText={this.state.newMessageText}
           />
         </div>
       </div>
@@ -63,25 +160,35 @@ class ChatClient extends React.Component {
 }
 
 ChatClient.propTypes = {
-  actionCreators: PropTypes.object,
-  accounts: PropTypes.object
+  selectedSender: PropTypes.object,
+  selectedReceiver: PropTypes.object,
+  fetchSender: PropTypes.func,
+  fetchReceiver: PropTypes.func,
+  sendNewMessage: PropTypes.func,
+  userIsTyping: PropTypes.func,
+  userStoppedTyping: PropTypes.func,
 };
 
 const mapStateToProps = state => ({
-  accounts: state.accounts,
-  messages: state.messages
+  selectedSender: state.accounts.selectedSender,
+  selectedReceiver: state.accounts.selectedReceiver,
+  usersTyping: state.messages.usersTyping,
+  messageList: state.messages.messageList,
 });
 
 const mapDispatchToProps = dispatch =>
   bindActionCreators(
     {
-      fetchUser,
-      toggleUserTyping
+      fetchSender,
+      fetchReceiver,
+      userIsTyping,
+      userStoppedTyping,
+      sendNewMessage,
     },
-    dispatch
-  );
+    dispatch,
+  )
 
 export default connect(
   mapStateToProps,
-  mapDispatchToProps
+  mapDispatchToProps,
 )(ChatClient);

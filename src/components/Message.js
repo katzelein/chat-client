@@ -1,24 +1,50 @@
 import React from 'react';
 import cn from 'classnames';
+import PropTypes from 'prop-types';
 
+const Message = ({
+  message,
+  sender,
+  userId,
+  showTime,
+  showIsTyping,
+  timeToDisplay,
+  showMessage,
+}) =>
+  <div>
+    { showMessage ? (
+      <div className='message-item'>
+        { showTime ? (
+          <div className='time-sent'>
+            { timeToDisplay }
+          </div>
+        ) : null }
 
-const Message = ({ isUser }) =>
-  <div className="message-item">
-    <div className="time-sent">
-      10:45 AM, Sep 27, 2012
-    </div>
-
-    <div className={cn("message-block", { 'is-user': isUser })}>
-      <div className="user-image">
-        LL
-      </div>
-      <div className={cn("chat-bubble", {'is-user': isUser })}>
-        <div className={cn("text-triangle", { 'is-user': isUser })}/>
-        <div className={cn("message-text", { 'is-user': isUser})}>
-          Hi Rob. What are you doing? I had a great today thanks in advance for askingggggg.
+        <div className={cn('message-block', { 'is-sender': userId === sender.id })}>
+          <div className='user-initials'>
+            { sender.initials }
+          </div>
+          <div className={cn('chat-bubble', {'is-sender': userId === sender.id })}>
+            <div className={cn('text-triangle', { 'is-sender': userId === sender.id, 'is-typing': showIsTyping })}/>
+            <div className={cn('message-text', { 'is-sender': userId === sender.id, 'is-typing': showIsTyping })}>
+              { showIsTyping ? (
+                <div>. . .</div>
+              ) : message.messageText }
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
+    ) : null }
+  </div>;
+
+Message.propTypes = {
+  message: PropTypes.object.isRequired,
+  sender: PropTypes.object.isRequired,
+  userId: PropTypes.number.isRequired,
+  showTime: PropTypes.bool.isRequired,
+  showIsTyping: PropTypes.bool,
+  timeToDisplay: PropTypes.string.isRequired,
+  showMessage: PropTypes.bool.isRequired
+};
 
 export default Message;

@@ -1,13 +1,15 @@
 import React, { Component } from 'react';
-import './App.css';
 import ChatClient from './components/ChatClient';
+import USER_MODE from './constants';
 
 class App extends Component {
   render() {
     return (
       <div className="app">
-        <ChatClient userId={1}/>
-        <ChatClient userId={2}/>
+        <div className="interface">
+          <ChatClient mode={USER_MODE.sender} />
+          <ChatClient mode={USER_MODE.receiver} />
+        </div>
       </div>
     );
   }
